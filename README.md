@@ -21,8 +21,8 @@ We will extract weather data from visual crossing via api. link--> https://www.v
 
 The output is a json. This contains precipitation and all soil data. Since the granularity goes down to city and by date. Since the DSCI is a metric that uses a week, we will aggregate the precipitation by sum and use week and average all our soil fields by the DSCI week.
 
-## About this notebook
-The folder prod_code is the production code for how I run the etl pipeline. I thought Jupyter Notebooks is a great way to give you my approach of extracting, transforming, and give you simple examples of the ETL pipeline.
+## About the notebook and scripts
+The folder prod_code is the production code for how I run the etl pipeline. I thought Jupyter Notebooks is a great way to give you my approach of extracting, transforming, and give you simple examples of the ETL pipeline. Please visit both notebooks and scripts.
 
 ## Final product
 After the data is all extracted and transformed we will load it into a duckdb. From there we will extract the duckdb to a CSV and create a tableau dashboard
