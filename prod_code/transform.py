@@ -19,7 +19,7 @@ def transform_ms_pop_data():
             df['Name'] = df['Name'].apply(lambda x: 'Jackson' if 'Jackson' in x else x)
             # Removing more funky characters
             df['Name'] = df['Name'].str.replace('†', '', regex=False).str.replace(r'\[.*?\]', '', regex=True).str.replace('â€¡', '', regex=False).str.strip()
-            # In the dataset on wikipedia they combo counties example is Jackson touches rankin, madison, and hinds county so I have to split the County column and explode it to create duplicate records
+            # In the dataset on wikipedia they combo counties example is Jackson touches rankin, madison, and hinds county, so I have to split the County column and explode it to create duplicate records
             df['County[1]'] = df['County[1]'].str.split(', ')
             df = df.explode('County[1]')
             #adding string "county" to look it up with the drought data
@@ -47,7 +47,7 @@ def transform_ms_pop_data():
 def transform_dsci_data():
     """
     transform the extracted DSCI data into a pandas DataFrame from a text csv. From there going to change data types, adding days because the drought monitor goes from tuesday to tuesday
-    after that i will explode the dates because i am going to aggregate all the percipitaion by coutny by the day.
+    after that i will explode the dates because i am going to aggregate all the precipitation by county by the day.
     :return:
     """
     try:
@@ -60,7 +60,7 @@ def transform_dsci_data():
             df['EOW'] = df['MapDate'] + timedelta(days=6)
             #making a date range between starting and stopping
             df['Date'] = df.apply(lambda x: pd.date_range(start=x['MapDate'], end=x['EOW']), axis=1)
-            #exploding that date rande
+            #exploding that date range
             df = df.explode('Date').reset_index(drop=True)
             #SOW = Start of week EOW = End of Week
             df.rename(columns={'MapDate': 'SOW'}, inplace=True)
@@ -75,12 +75,20 @@ def transform_dsci_data():
 
 
 def transform_weather_data():
+    '''
+    Unpacking the json weather data into a pandas DataFrame
+    :return:
+    '''
     try:
         weather_data = extract_weather_data()
         if weather_data:
+            #making and empy list to store data
             records = []
+            #forloop starting
             for city_data in weather_data:
+                #getting the location
                 city_name = city_data.get('resolvedAddress', 'Unknown')
+                #getting data from json
                 for day in city_data.get('days', []):
                     day_record = {
                         'City': city_name,
@@ -94,7 +102,9 @@ def transform_weather_data():
                         'SoilMoistureVol20': day.get('soilmoisturevol20', None)
                     }
                     records.append(day_record)
+            #making it to list
             df = pd.DataFrame(records)
+            #More cleaning to join on city
             df['City'] = df['City'].str.replace(', MS, United States', '').str.strip()
             df['Date']= pd.to_datetime(df['Date'], format='%Y-%m-%d')
             print('Data transformed successfully!')
@@ -107,13 +117,17 @@ def transform_weather_data():
         print(f"An error occurred during transformation: {e}")
 
 def join_data():
+    '''
+    joining all the data together into a single data frame
+    :return:
+    '''
     try:
         df1 = transform_ms_pop_data()
         df2 = transform_dsci_data()
         df3 = transform_weather_data()
         df = pd.merge(df1, df2, on=['County'], how='inner')
         df = pd.merge(df, df3, on=['City', 'Date'], how='inner')
-        # Group by County, City, Start of week and aggregates of sum of percipitation
+        # Group by County, City, Start of week and aggregates of sum of precipitation
         aggregated_df = df.groupby(['County', 'City', 'SOW', 'DSCI']).agg({
             'Precipitation': 'sum',
             'SoilTemp10': 'mean',

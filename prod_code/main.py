@@ -9,6 +9,10 @@ logging.basicConfig(
 )
 
 def main():
+    '''
+    Runs the etl pipeline
+    :return: Pipeline is ran successfully  or not.
+    '''
     logging.info("Starting the data pipeline...")
     try:
         load_data_to_duckdb()

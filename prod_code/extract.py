@@ -30,7 +30,7 @@ def extract_ms_pop_data():
 
 def extract_dsci_data():
     """
-    Extracting the DSCI for mississippi
+    Extracting the DSCI drought data for mississippi
 
     :return:
     """
@@ -58,7 +58,7 @@ city_list= [
 
 def extract_weather_data():
     """
-    Extract weather data for unique cities
+    Extract weather data for unique cities from the city list
 
     :return: Weather data for each city
     """

@@ -7,7 +7,10 @@ import duckdb
 from transform import join_data
 
 def load_data_to_duckdb():
-    # Define the DuckDB database file
+    '''
+    Taking our joined data and loading it to duckdb table
+    :return:
+    '''
     db_file = 'ms_county_stats.duckdb'
 
     # Get the transformed data
@@ -15,8 +18,9 @@ def load_data_to_duckdb():
 
     if df is not None:
         try:
-            # Connect to DuckDB and create a new table
+            # establishing a connection
             conn = duckdb.connect(db_file)
+            #creating the table
             conn.execute("CREATE OR REPLACE TABLE ms_county_stats AS SELECT * FROM df")
             print(f"Loaded data into {db_file}.")
         except Exception as e:

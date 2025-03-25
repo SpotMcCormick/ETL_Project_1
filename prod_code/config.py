@@ -4,7 +4,7 @@
 import os 
 from dotenv import load_dotenv
 
-load_dotenv( r'D:\ETL Project 1\.env')
+load_dotenv()
 
 api_key = os.getenv('API_KEY')
 
