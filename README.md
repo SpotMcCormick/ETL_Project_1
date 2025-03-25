@@ -24,7 +24,7 @@ The output is a json. This contains precipitation and all soil data. Since the g
 ## About the notebook and scripts
 The folder prod_code is the production code for how I run the etl pipeline. I thought Jupyter Notebooks is a great way to give you my approach of extracting, transforming, and give you simple examples of the ETL pipeline. Please visit both notebooks and scripts.
 
-## Final product
+## Final Product
 After the data is all extracted and transformed we will load it into a duckdb. From there we will extract the duckdb to a CSV and create a tableau dashboard
 Link--> https://public.tableau.com/app/profile/jeremy.mccormick/viz/MSDroughtWeatherCorrelationTracker/Dashboard
 
