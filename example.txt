@@ -1,0 +1,110 @@
+F:\ETL Project 1\
+    ├── extract.py
+    ├── transform.py
+    ├── load.py
+    ├── config.py
+    ├── .env
+    ├── main.py
+
+
+
+# extract.py
+import cx_Oracle
+import pandas as pd
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env
+
+# Oracle connection parameters from .env
+dsn = cx_Oracle.makedsn(os.getenv("ORACLE_HOST"), os.getenv("ORACLE_PORT"), service_name=os.getenv("ORACLE_SERVICE"))
+connection = cx_Oracle.connect(user=os.getenv("ORACLE_USER"), password=os.getenv("ORACLE_PASSWORD"), dsn=dsn)
+
+def extract_data():
+    # Query to extract data
+    query = "SELECT * FROM your_table"
+    df = pd.read_sql(query, connection)
+    return df
+
+# If you want to close the connection at the end
+def close_connection():
+    connection.close()
+
+if __name__ == "__main__":
+    df = extract_data()
+    print(df.head())
+    close_connection()
+
+
+
+# transform.py
+import pandas as pd
+
+def transform_data(df):
+    # Perform transformations: example - renaming columns
+    df['new_column'] = df['old_column'].apply(lambda x: x.strip() if isinstance(x, str) else x)
+
+    # Example: Removing rows with missing values in the 'important_column'
+    df = df.dropna(subset=['important_column'])
+
+    # Example: Aggregating data
+    df_grouped = df.groupby('category').agg({'amount': 'sum'}).reset_index()
+    
+    return df_grouped
+
+if __name__ == "__main__":
+    # This will be called from the main file where the DataFrame is passed
+    print("Transforming data...")
+
+
+
+# load.py
+import snowflake.connector
+from snowflake.connector.pandas_tools import pd_writer
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env
+
+# Snowflake connection parameters from .env
+def load_data_to_snowflake(df):
+    conn = snowflake.connector.connect(
+        user=os.getenv("SNOWFLAKE_USER"),
+        password=os.getenv("SNOWFLAKE_PASSWORD"),
+        account=os.getenv("SNOWFLAKE_ACCOUNT"),
+        warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
+        database=os.getenv("SNOWFLAKE_DATABASE"),
+        schema=os.getenv("SNOWFLAKE_SCHEMA")
+    )
+
+    # Loading the DataFrame into Snowflake
+    df.to_sql('your_table', conn, index=False, method=pd_writer, if_exists='replace')
+    print("Data loaded to Snowflake successfully")
+    
+    # Close the Snowflake connection
+    conn.close()
+
+if __name__ == "__main__":
+    print("Loading data to Snowflake...")
+
+
+
+# main.py
+from extract import extract_data
+from transform import transform_data
+from load import load_data_to_snowflake
+
+def run_etl():
+    # Step 1: Extract
+    df = extract_data()
+
+    # Step 2: Transform
+    transformed_df = transform_data(df)
+
+    # Step 3: Load
+    load_data_to_snowflake(transformed_df)
+
+if __name__ == "__main__":
+    run_etl()
+
+
